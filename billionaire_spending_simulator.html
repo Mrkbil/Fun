@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billionaire Spending Simulator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // Custom color theme for Tailwind CSS
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e3a8a',
+                        'gold-primary': '#f59e0b',
+                        'gold-secondary': '#fbbf24',
+                        'gold-light': '#fef3c7',
+                        'gold-dark': '#d97706',
+                        'light-bg': '#f9fafb',
+                        'card-bg': '#ffffff',
+                        'text-dark': '#1f2937',
+                        'text-light': '#6b7280',
+                        'social': '#10b981',
+                        'social-light': '#d1fae5',
+                        'accent': '#3b82f6',
+                    },
+                    boxShadow: {
+                        'card-hover': '0 15px 30px -5px rgba(0, 0, 0, 0.1)',
+                        'tab-active': '0 4px 12px -2px rgba(0, 0, 0, 0.1)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <!-- Global Styles -->
+    <style>
+        body {
+            @apply bg-gradient-to-br from-light-bg to-gold-light text-text-dark font-sans;
+        }
+        .btn-gold {
+            @apply bg-gradient-to-r from-gold-primary to-gold-dark text-white font-semibold py-2.5 px-5 rounded-xl hover:shadow-card-hover hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100;
+        }
+        .btn-social {
+            @apply bg-gradient-to-r from-social to-green-600 text-white font-semibold py-2.5 px-5 rounded-xl hover:shadow-card-hover hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100;
+        }
+        .btn-outline {
+            @apply border-2 border-gold-primary text-gold-dark font-semibold py-2 px-5 rounded-xl hover:bg-gold-primary hover:text-white transition-all duration-300;
+        }
+        .btn-category {
+            @apply px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 border-2 border-gold-primary/20 text-gold-dark hover:bg-gold-primary hover:text-white;
+        }
+        .btn-category.active {
+            @apply bg-gold-primary text-white border-gold-primary shadow-md scale-105;
+        }
+        .btn-social-category {
+            @apply px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 border-2 border-social/20 text-social hover:bg-social hover:text-white;
+        }
+        .btn-social-category.active {
+            @apply bg-social text-white border-social shadow-md scale-105;
+        }
+        .card {
+            @apply bg-card-bg rounded-2xl p-6 shadow-md border border-gold-primary/10 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1;
+        }
+        .tab-btn {
+            @apply px-6 py-3 text-base font-semibold transition-all duration-300 bg-transparent text-text-light hover:bg-gold-light/50 rounded-t-xl;
+        }
+        .tab-btn.active {
+            @apply text-gold-dark bg-white border-b-4 border-gold-primary font-bold shadow-tab-active;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1);
+        }
+        .balance-pulse {
+            animation: balancePulse 1.5s ease;
+        }
+        @keyframes balancePulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        .social-gradient {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        }
+        .product-card img {
+            @apply transition-transform duration-300 rounded-t-xl;
+        }
+        .product-card:hover img {
+            transform: scale(1.1);
+        }
+        .quantity-input {
+            @apply w-16 p-2 border border-gold-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-primary text-center text-sm;
+        }
+        .header-animation {
+            animation: slideIn 0.8s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .notification-slide {
+            animation: slideInRight 0.5s ease-out forwards;
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(120%); }
+            to { transform: translateX(0); }
+        }
+        .notification-slide-out {
+            animation: slideOutRight 0.5s ease-in forwards;
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0); }
+            to { transform: translateX(120%); }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Floating Balance Display -->
+ <div id="fixed-balance" 
+     class="fixed bottom-5 right-5 bg-white p-4 rounded-2xl shadow-xl 
+            border border-gold-primary/20 z-50 text-right 
+            transform transition-transform duration-300">
+    <h3 class="font-semibold text-gold-primary text-sm uppercase tracking-wide">
+        Remaining Balance
+    </h3>
+    <div id="fixed-balance-amount" class="text-2xl font-bold text-gold-dark">
+        $0
+    </div>
+</div>
+
+
+    <header class="bg-white text-gold-dark py-8 text-center rounded-b-2xl shadow-lg mb-8 border-b-4 border-gold-primary header-animation">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2 tracking-tight"><i class="fas fa-crown mr-2"></i>Billionaire Spending Simulator</h1>
+            <p class="text-lg md:text-xl text-text-light">Live the billionaire lifestyle and spend a fortune!</p>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 pb-12">
+        <!-- Tabs -->
+       <div class="flex border-b border-gray-300 mb-8 bg-gold-light/20 rounded-t-2xl px-4 overflow-x-auto shadow-sm gap-x-3">
+    <button class="tab-btn active whitespace-nowrap px-4 py-2 rounded-t-lg bg-white shadow font-medium border border-gray-300 border-b-0 text-gray-800 hover:bg-gray-50 transition" data-tab="spend">
+        Spend Money
+    </button>
+    <button class="tab-btn whitespace-nowrap px-4 py-2 rounded-t-lg bg-gray-100 font-medium border border-transparent hover:border-gray-300 text-gray-700 hover:bg-gray-50 transition" data-tab="inventory">
+        Your Inventory
+    </button>
+    <button class="tab-btn whitespace-nowrap px-4 py-2 rounded-t-lg bg-gray-100 font-medium border border-transparent hover:border-gray-300 text-gray-700 hover:bg-gray-50 transition" data-tab="stats">
+        Statistics
+    </button>
+</div>
+
+        <!-- Spend Money Tab -->
+        <div class="tab-content active" id="spend-tab">
+            <div class="flex flex-col lg:flex-row gap-6 mb-8">
+                <!-- Billionaire Selector -->
+                <div class="card flex-1">
+                    <h2 class="text-2xl font-bold mb-4 text-gold-primary"><i class="fas fa-user-tie mr-2"></i>Select a Billionaire</h2>
+                    <p class="text-text-light mb-4 text-base">Choose a billionaire to inherit their fortune and start spending!</p>
+                    <select id="billionaire-select" class="w-full p-3 border border-gold-primary/20 rounded-lg bg-white text-text-dark focus:outline-none focus:ring-2 focus:ring-gold-primary mb-4 text-base transition-all duration-300">
+                        <option value="">-- Choose a Billionaire --</option>
+                        <!-- Options will be dynamically loaded here -->
+                    </select>
+                   <button id="select-billionaire" 
+    class="w-full text-base font-semibold rounded-xl py-3 px-4 
+           bg-yellow-500 text-white shadow-md 
+           hover:bg-yellow-600 hover:shadow-lg 
+           active:bg-yellow-700 active:scale-95 
+           transition flex items-center justify-center">
+    <i class="fas fa-check-circle mr-2"></i>
+    Select Billionaire
+</button>
+
+                </div>
+
+                <!-- Balance Display -->
+                <div class="card flex-1 text-center flex flex-col justify-center bg-gradient-to-br from-white to-gold-light/50 p-6 relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-gold-primary/10 rounded-full"></div>
+                    <div class="absolute -left-10 -bottom-10 w-28 h-28 bg-gold-primary/10 rounded-full"></div>
+                    <h2 class="text-2xl font-bold mb-2 text-gold-primary"><i class="fas fa-coins mr-2"></i>Your Inherited Fortune</h2>
+                    <div id="balance" class="text-4xl md:text-5xl font-bold text-gold-dark my-4">$0</div>
+                    <p class="text-text-light text-base" id="balance-description">Select a billionaire to see their fortune!</p>
+                </div>
+            </div>
+
+            <!-- Category Filters -->
+            <div class="card mb-6 bg-white rounded-2xl shadow-md p-5 border border-gold-primary/10">
+    <h3 class="text-xl font-bold mb-4 text-gold-primary flex items-center">
+        <i class="fas fa-filter mr-2"></i> Categories
+    </h3>
+
+    <!-- Categories Grid -->
+    <div class="flex flex-wrap gap-3 mb-4">
+        <button class="btn-category active px-4 py-2 rounded-lg bg-yellow-500 text-white font-medium shadow-sm hover:bg-yellow-600 transition" data-category="all">
+            All
+        </button>
+        <button class="btn-category px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition" data-category="Real Estate">
+            Real Estate
+        </button>
+        <button class="btn-category px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition" data-category="Vehicles">
+            Vehicles
+        </button>
+        <button class="btn-category px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition" data-category="Technology">
+            Technology
+        </button>
+        <button class="btn-category px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition" data-category="Fashion">
+            Fashion
+        </button>
+        <button class="btn-category px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition" data-category="Food">
+            Food
+        </button>
+        <button class="btn-category px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition" data-category="Travel">
+            Travel
+        </button>
+        <button class="btn-category px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition" data-category="Entertainment">
+            Entertainment
+        </button>
+        <button class="btn-category px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition" data-category="Health">
+            Health
+        </button>
+        <button class="btn-category px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition" data-category="Art">
+            Art
+        </button>
+        <button class="btn-category px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition" data-category="Business">
+            Business
+        </button>
+    </div>
+
+    <!-- Social Impact Section -->
+    <div class="border-t border-gold-primary/10 pt-4">
+        <h4 class="text-lg font-semibold mb-3 text-social flex items-center">
+            <i class="fas fa-heart mr-2"></i> Social Impact
+        </h4>
+        <button class="btn-social-category px-4 py-2 rounded-lg bg-green-500 text-white font-medium shadow-sm hover:bg-green-600 transition" data-category="Social Work">
+            Social Work
+        </button>
+    </div>
+</div>
+
+
+            <!-- Products -->
+            <div class="card">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gold-primary"><i class="fas fa-shopping-cart mr-2"></i><span id="category-title">Luxury Products</span></h2>
+                    <div class="flex mt-4 md:mt-0">
+                        <span class="text-sm text-text-light mr-3 self-center">Sort by:</span>
+                        <select id="sort-products" class="text-sm border border-gold-primary/20 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-gold-primary">
+                            <option value="price-asc">Price (Low to High)</option>
+                            <option value="price-desc">Price (High to Low)</option>
+                            <option value="name">Name</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="products-container" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                    <!-- Products will be dynamically generated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Tab -->
+        <div class="tab-content" id="inventory-tab">
+            <div class="card">
+                <h2 class="text-2xl font-bold mb-4 text-gold-primary"><i class="fas fa-warehouse mr-2"></i>Your Purchases</h2>
+                <p class="text-text-light mb-6 text-base">All the luxury items you've purchased with your billionaire wealth.</p>
+                <div id="inventory-list" class="space-y-4">
+                    <div class="text-center py-12">
+                        <i class="fas fa-box-open text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-text-light">You haven't purchased anything yet.</p>
+                        <button class="btn-outline mt-4 switch-tab" data-tab="spend">Start Shopping</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Tab -->
+        <div class="tab-content" id="stats-tab">
+            <div class="card">
+                <h2 class="text-2xl font-bold mb-4 text-gold-primary"><i class="fas fa-chart-pie mr-2"></i>Spending Statistics</h2>
+                <p class="text-text-light mb-6 text-base">See how you've been spending your billionaire fortune.</p>
+                <div id="stats-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-gold-light/50 rounded-xl p-6 text-center shadow-sm hover:shadow-card-hover transition-all duration-300">
+                        <div class="text-3xl font-bold text-gold-dark mb-2" id="total-items">0</div>
+                        <div class="text-text-light text-base">Total Items</div>
+                    </div>
+                    <div class="bg-gold-light/50 rounded-xl p-6 text-center shadow-sm hover:shadow-card-hover transition-all duration-300">
+                        <div class="text-3xl font-bold text-gold-dark mb-2" id="total-spent">$0</div>
+                        <div class="text-text-light text-base">Total Spent</div>
+                    </div>
+                    <div class="bg-gold-light/50 rounded-xl p-6 text-center shadow-sm hover:shadow-card-hover transition-all duration-300">
+                        <div class="text-3xl font-bold text-gold-dark mb-2" id="remaining-balance">$0</div>
+                        <div class="text-text-light text-base">Remaining Balance</div>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <h3 class="text-xl font-semibold mb-4 text-gold-primary">Spending Distribution</h3>
+                    <div id="chart-container" class="h-80 flex items-center justify-center bg-gold-light/20 rounded-xl">
+                        <p class="text-text-light">Purchase items to see spending distribution</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="fixed top-5 left-5 right-5 md:left-auto md:right-5 md:w-96 bg-gradient-to-r from-gold-primary to-gold-dark text-white py-3 px-6 rounded-xl shadow-lg transform translate-x-[120%] z-50">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span id="notification-text"></span>
+    </div>
+
+    <footer class="text-center mt-12 py-6 text-text-light bg-white rounded-t-xl border-t border-gold-primary/10">
+        <p class="text-base">Billionaire Spending Simulator &copy; 2025</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DATA (JSON Format) ---
+            const appData = {
+                "billionaires": [
+                    { "name": "Elon Musk", "netWorth": 385000000000 },
+                    { "name": "Jeff Bezos", "netWorth": 245000000000 },
+                    { "name": "Mark Zuckerberg", "netWorth": 260000000000 },
+                    { "name": "Bill Gates", "netWorth": 115000000000 },
+                    { "name": "Warren Buffett", "netWorth": 115000000000 }
+                ],
+                "products": [
+                    // Real Estate
+                    { "id": 1, "name": "Luxury Penthouse", "price": 25000000, "image": "https://media.vrbo.com/lodging/100000000/99930000/99926500/99926452/07742dbf.jpg?impolicy=resizecrop&rw=575&rh=575&ra=fill", "category": "Real Estate" },
+                    { "id": 2, "name": "Private Island", "price": 150000000, "image": "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=500", "category": "Real Estate" },
+                    { "id": 3, "name": "Historic Castle", "price": 75000000, "image": "https://images.unsplash.com/photo-1520637836862-4d197d17c87a?w=500", "category": "Real Estate" },
+                    // Vehicles
+                    { "id": 4, "name": "Tesla Model S Plaid", "price": 129990, "image": "https://hips.hearstapps.com/hmg-prod/images/2025-tesla-model-s-1-672d42e172407.jpg?crop=0.465xw:0.466xh;0.285xw,0.361xh&resize=2048:*", "category": "Vehicles" },
+                    { "id": 5, "name": "Bugatti Chiron", "price": 3500000, "image": "https://images.unsplash.com/photo-1544829099-b9a0c5303bea?w=500", "category": "Vehicles" },
+                    { "id": 6, "name": "Private Helicopter", "price": 15000000, "image": "https://images.unsplash.com/photo-1540979388789-6cee28a1cdc9?w=500", "category": "Vehicles" },
+                    // Technology
+                    { "id": 7, "name": "iPhone 16 Pro Max", "price": 999, "image": "https://www.zdnet.com/a/img/resize/90f6e5fe1ba09df72dacb4edf4590e4be1575445/2024/09/22/58c4c6e7-84d9-4fd2-9838-e962dc57ccc5/iphone-16-pro-outside-apple-store.jpg?auto=webp&width=1280", "category": "Technology" },
+                    { "id": 8, "name": "Gaming Super Computer", "price": 50000, "image": "https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=500", "category": "Technology" },
+                    { "id": 9, "name": "Home AI System", "price": 500000, "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500", "category": "Technology" },
+                    // Fashion
+                    { "id": 10, "name": "Diamond Rolex", "price": 2500000, "image": "https://images.unsplash.com/photo-1523170335258-f5c6c6bd6edc?w=500", "category": "Fashion" },
+                    { "id": 11, "name": "Designer Wardrobe", "price": 1000000, "image": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500", "category": "Fashion" },
+                    { "id": 12, "name": "Rare Handbag Collection", "price": 500000, "image": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500", "category": "Fashion" },
+                    // Food
+                    { "id": 13, "name": "Private Chef (1 Year)", "price": 300000, "image": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500", "category": "Food" },
+                    { "id": 14, "name": "Wine Collection", "price": 5000000, "image": "https://images.unsplash.com/photo-1547595628-c61a29f496f0?w=500", "category": "Food" },
+                    { "id": 15, "name": "Luxury Restaurant", "price": 50000000, "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500", "category": "Food" },
+                    // Travel
+                    { "id": 16, "name": "Private Jet", "price": 250000000, "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-IGKds7zRpEP8oYaMrFQzAaEeHBiYZAPGHA&s", "category": "Travel" },
+                    { "id": 17, "name": "Luxury Yacht", "price": 150000000, "image": "https://image.yachtbuyer.com/w1210/h694/qh/ca/k3d44a71b/vessel/resource/2756344/platinum-yacht-admiral-yachts.jpg", "category": "Travel" },
+                    { "id": 18, "name": "Space Tourism Trip", "price": 450000, "image": "https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=500", "category": "Travel" },
+                    // Entertainment
+                    { "id": 19, "name": "Home Cinema", "price": 2000000, "image": "https://images.unsplash.com/photo-1489599004919-5b4f656a82e9?w=500", "category": "Entertainment" },
+                    { "id": 20, "name": "Sports Team", "price": 2000000000, "image": "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=500", "category": "Entertainment" },
+                    { "id": 21, "name": "Concert Hall", "price": 100000000, "image": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500", "category": "Entertainment" },
+                    // Health
+                    { "id": 22, "name": "Personal Trainer (1 Year)", "price": 100000, "image": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500", "category": "Health" },
+                    { "id": 23, "name": "Medical Center", "price": 500000000, "image": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=500", "category": "Health" },
+                    { "id": 24, "name": "Longevity Research", "price": 1000000000, "image": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=500", "category": "Health" },
+                    // Art
+                    { "id": 25, "name": "Famous Painting", "price": 300000000, "image": "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=500", "category": "Art" },
+                    { "id": 26, "name": "Art Gallery", "price": 50000000, "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500", "category": "Art" },
+                    { "id": 27, "name": "Sculpture Collection", "price": 25000000, "image": "https://images.unsplash.com/photo-1578662015879-c0f77e7f35f3?w=500", "category": "Art" },
+                    // Business
+                    { "id": 28, "name": "Tech Startup", "price": 1000000000, "image": "https://images.pexels.com/photos/269077/pexels-photo-269077.jpeg", "category": "Business" },
+                    { "id": 29, "name": "Media Company", "price": 5000000000, "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500", "category": "Business" },
+                    { "id": 30, "name": "Real Estate Empire", "price": 10000000000, "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=500", "category": "Business" },
+                    // Social Work
+                    { "id": 31, "name": "Build 100 Schools", "price": 500000000, "image": "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=500", "category": "Social Work" },
+                    { "id": 32, "name": "Clean Water for 1M People", "price": 200000000, "image": "https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=500", "category": "Social Work" },
+                    { "id": 33, "name": "Fund Medical Research", "price": 1000000000, "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500", "category": "Social Work" }
+                ]
+            };
+
+            // --- STATE ---
+            let balance = 0;
+            let inventory = {};
+            let totalSpent = 0;
+            let startingBalance = 0;
+            let currentCategory = 'all';
+
+            // --- DOM Elements ---
+            const balanceElement = document.getElementById('balance');
+            const fixedBalanceAmount = document.getElementById('fixed-balance-amount');
+            const billionaireSelect = document.getElementById('billionaire-select');
+            const selectButton = document.getElementById('select-billionaire');
+            const productsContainer = document.getElementById('products-container');
+            const inventoryList = document.getElementById('inventory-list');
+            const tabs = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            const sortSelect = document.getElementById('sort-products');
+            const totalItemsElement = document.getElementById('total-items');
+            const totalSpentElement = document.getElementById('total-spent');
+            const remainingBalanceElement = document.getElementById('remaining-balance');
+            const categoryTitle = document.getElementById('category-title');
+            const categoryButtons = document.querySelectorAll('.btn-category, .btn-social-category');
+            const balanceDescription = document.getElementById('balance-description');
+
+            // --- HELPER FUNCTIONS ---
+            const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
+
+            const showNotification = (message) => {
+                notificationText.textContent = message;
+                notification.classList.remove('translate-x-[120%]');
+                notification.classList.add('notification-slide');
+                setTimeout(() => {
+                    notification.classList.remove('notification-slide');
+                    notification.classList.add('notification-slide-out');
+                    setTimeout(() => {
+                        notification.classList.add('translate-x-[120%]');
+                        notification.classList.remove('notification-slide-out');
+                    }, 500);
+                }, 3000);
+            };
+
+            const getFilteredProducts = () => {
+                if (currentCategory === 'all') return appData.products;
+                return appData.products.filter(product => product.category === currentCategory);
+            };
+
+            // --- UPDATE FUNCTIONS ---
+            const updateBalanceDisplay = () => {
+                fixedBalanceAmount.textContent = formatCurrency(balance);
+                balanceElement.textContent = formatCurrency(startingBalance);
+                fixedBalanceAmount.classList.add('balance-pulse');
+                setTimeout(() => fixedBalanceAmount.classList.remove('balance-pulse'), 1500);
+                updateStats();
+            };
+
+            const updateProductAffordability = () => {
+                document.querySelectorAll('.product-card').forEach(card => {
+                    const price = parseInt(card.dataset.price);
+                    const qtyInput = card.querySelector('.quantity-input');
+                    const qty = parseInt(qtyInput.value) || 1;
+                    card.querySelector('.buy-btn').disabled = balance < price * qty;
+                });
+            };
+
+            const updateInventoryDisplay = () => {
+                if (Object.keys(inventory).length === 0) {
+                    inventoryList.innerHTML = `
+                        <div class="text-center py-12">
+                            <i class="fas fa-box-open text-4xl text-gray-300 mb-3"></i>
+                            <p class="text-text-light">You haven't purchased anything yet.</p>
+                            <button class="btn-outline mt-4 switch-tab" data-tab="spend">Start Shopping</button>
+                        </div>`;
+                    return;
+                }
+
+                inventoryList.innerHTML = '';
+                for (const item of Object.values(inventory)) {
+                    const isSocialWork = item.category === 'Social Work';
+                    inventoryList.innerHTML += `
+                        <div class="flex justify-between items-center p-4 border ${isSocialWork ? 'border-social/20 bg-social-light/30' : 'border-gold-primary/20'} rounded-xl hover:${isSocialWork ? 'bg-social-light/50' : 'bg-gold-light/20'} transition-all duration-300">
+                            <div class="flex items-center gap-4">
+                                <img src="${item.image}" alt="${item.name}" class="w-12 h-12 md:w-16 md:h-16 object-cover rounded-lg shadow-sm">
+                                <div>
+                                    <span class="font-semibold block text-base">${item.name}</span>
+                                    <span class="text-sm text-text-light">${formatCurrency(item.price)} each</span>
+                                    ${isSocialWork ? '<span class="text-xs bg-social text-white px-2 py-1 rounded-full ml-2">Social Impact</span>' : ''}
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-lg">x ${item.quantity.toLocaleString()}</div>
+                                <div class="text-sm text-text-light">Total: ${formatCurrency(item.price * item.quantity)}</div>
+                            </div>
+                        </div>`;
+                }
+            };
+
+            const updateStats = () => {
+                const totalItems = Object.values(inventory).reduce((sum, item) => sum + item.quantity, 0);
+                totalItemsElement.textContent = totalItems.toLocaleString();
+                totalSpentElement.textContent = formatCurrency(totalSpent);
+                remainingBalanceElement.textContent = formatCurrency(balance);
+                updateChart();
+            };
+
+            const updateChart = () => {
+                const chartContainer = document.getElementById('chart-container');
+                if (totalSpent === 0) {
+                    chartContainer.innerHTML = '<p class="text-text-light">Purchase items to see spending distribution</p>';
+                    return;
+                }
+
+                const spendingByCategory = {};
+                Object.values(inventory).forEach(item => {
+                    if (!spendingByCategory[item.category]) {
+                        spendingByCategory[item.category] = 0;
+                    }
+                    spendingByCategory[item.category] += item.price * item.quantity;
+                });
+
+                const categoryColors = {
+                    'Real Estate': '#3b82f6', 'Vehicles': '#ef4444', 'Technology': '#8b5cf6',
+                    'Fashion': '#f97316', 'Food': '#22c55e', 'Travel': '#14b8a6',
+                    'Entertainment': '#eab308', 'Health': '#3b82f6', 'Art': '#a855f7',
+                    'Business': '#1e3a8a', 'Social Work': '#10b981'
+                };
+
+                let chartHTML = '<div class="w-full space-y-4">';
+                for (const category in spendingByCategory) {
+                    const percentage = (spendingByCategory[category] / totalSpent) * 100;
+                    const color = categoryColors[category] || '#6b7280';
+                    chartHTML += `
+                        <div class="w-full">
+                            <div class="flex justify-between mb-1 text-sm">
+                                <span class="font-semibold" style="color: ${color};">${category}</span>
+                                <span>${percentage.toFixed(2)}%</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-5">
+                                <div class="h-5 rounded-full transition-all duration-500" style="width: ${percentage}%; background-color: ${color};"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+                chartHTML += '</div>';
+                chartContainer.innerHTML = chartHTML;
+            };
+
+            const renderProducts = () => {
+                let products = getFilteredProducts();
+                const sortValue = sortSelect.value;
+
+                if (sortValue === 'price-asc') products.sort((a, b) => a.price - b.price);
+                else if (sortValue === 'price-desc') products.sort((a, b) => b.price - a.price);
+                else if (sortValue === 'name') products.sort((a, b) => a.name.localeCompare(b.name));
+
+                productsContainer.innerHTML = '';
+                if (products.length === 0) {
+                    productsContainer.innerHTML = `<p class="col-span-full text-center text-text-light py-10">No products found in this category.</p>`;
+                    return;
+                }
+                products.forEach(product => {
+                    const isSocial = product.category === 'Social Work';
+                    const cardHTML = `
+                        <div class="product-card flex flex-col rounded-xl overflow-hidden border ${isSocial ? 'border-social/20' : 'border-gold-primary/20'} bg-white" data-id="${product.id}" data-price="${product.price}">
+                            <img src="${product.image}" alt="${product.name}" class="w-full h-40 md:h-56 object-cover">
+                            <div class="p-4 flex flex-col flex-grow">
+                                <h4 class="font-semibold text-base md:text-lg mb-1 flex-grow">${product.name}</h4>
+                                <p class="text-gold-dark font-semibold text-lg mb-3">${formatCurrency(product.price)}</p>
+                                <div class="flex mt-auto gap-2">
+                                    <input type="number" min="1" value="1" class="quantity-input">
+                                    <button class="buy-btn flex-1 ${isSocial ? 'bg-green-500 hover:bg-blue-600 active:bg-blue-700' : 'bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700'} 
+           text-sm text-white font-medium py-2 px-4 rounded-lg shadow-md 
+           flex items-center justify-center transition active:scale-95">
+    <i class="fas fa-plus-circle mr-1"></i> Buy
+</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    productsContainer.innerHTML += cardHTML;
+                });
+                updateProductAffordability();
+            };
+
+            const init = () => {
+                appData.billionaires.forEach(b => {
+                    billionaireSelect.innerHTML += `<option value="${b.netWorth}">${b.name} (${formatCurrency(b.netWorth)})</option>`;
+                });
+                renderProducts();
+
+                selectButton.addEventListener('click', () => {
+                    const selectedWorth = parseInt(billionaireSelect.value);
+                    if (!selectedWorth) {
+                        showNotification('Please select a billionaire first.');
+                        return;
+                    }
+                    startingBalance = selectedWorth;
+                    balance = selectedWorth;
+                    updateBalanceDisplay();
+                    updateProductAffordability();
+                    showNotification(`You've inherited ${formatCurrency(startingBalance)}! Start spending.`);
+                    billionaireSelect.disabled = true;
+                    selectButton.disabled = true;
+                    selectButton.innerHTML = `<i class="fas fa-check-circle mr-2"></i>Selected!`;
+                    balanceDescription.textContent = 'Your starting fortune is ready to spend!';
+                });
+
+                productsContainer.addEventListener('click', e => {
+                    if (e.target.classList.contains('buy-btn')) {
+                        const card = e.target.closest('.product-card');
+                        const productId = parseInt(card.dataset.id);
+                        const product = appData.products.find(p => p.id === productId);
+                        const qtyInput = card.querySelector('.quantity-input');
+                        const qty = parseInt(qtyInput.value) || 1;
+                        if (qty < 1 || isNaN(qty)) {
+                            showNotification('Please enter a valid quantity.');
+                            return;
+                        }
+                        const totalPrice = product.price * qty;
+                        if (balance >= totalPrice) {
+                            balance -= totalPrice;
+                            totalSpent += totalPrice;
+                            if (inventory[productId]) {
+                                inventory[productId].quantity += qty;
+                            } else {
+                                inventory[productId] = { ...product, quantity: qty };
+                            }
+                            showNotification(`Purchased ${qty.toLocaleString()} x ${product.name}!`);
+                            updateBalanceDisplay();
+                            updateProductAffordability();
+                            updateInventoryDisplay();
+                        } else {
+                            showNotification("You can't afford this quantity.");
+                        }
+                    }
+                });
+
+                productsContainer.addEventListener('input', e => {
+                    if (e.target.classList.contains('quantity-input')) {
+                        updateProductAffordability();
+                    }
+                });
+
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        tabs.forEach(t => t.classList.remove('active'));
+                        tabContents.forEach(c => c.classList.remove('active'));
+                        tab.classList.add('active');
+                        document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+                    });
+                });
+
+                document.addEventListener('click', e => {
+                    if (e.target.classList.contains('switch-tab')) {
+                        const tabId = e.target.dataset.tab;
+                        document.querySelector(`.tab-btn[data-tab="${tabId}"]`).click();
+                    }
+                });
+
+                categoryButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        categoryButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        currentCategory = button.dataset.category;
+                        categoryTitle.textContent = currentCategory === 'all' ? 'Luxury Products' : currentCategory;
+                        renderProducts();
+                    });
+                });
+
+                sortSelect.addEventListener('change', renderProducts);
+            };
+
+            init();
+        });
+    </script>
+</body>
+</html>

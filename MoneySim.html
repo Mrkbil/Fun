@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billionaire Spending Simulator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // Custom color theme for Tailwind CSS
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2c3e50',
+                        'gold-primary': '#d4af37',
+                        'gold-secondary': '#ffd700',
+                        'gold-light': '#faf3e0',
+                        'gold-dark': '#b8860b',
+                        'light-bg': '#f8f9fa',
+                        'card-bg': '#ffffff',
+                        'text-dark': '#2d3748',
+                        'text-light': '#718096',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Global Styles -->
+    <style>
+        body {
+            @apply bg-gradient-to-b from-gold-light to-white text-text-dark;
+        }
+        .btn-gold {
+            @apply bg-gradient-to-r from-gold-primary to-gold-dark text-white font-bold py-3 px-4 rounded-lg hover:shadow-lg hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed;
+        }
+        .btn-outline {
+            @apply border-2 border-gold-primary text-gold-dark font-bold py-2 px-4 rounded-lg hover:bg-gold-primary hover:text-white transition-all duration-300;
+        }
+        .card {
+            @apply bg-card-bg rounded-xl p-6 shadow-md border border-gold-primary/20 transition-all duration-300 hover:shadow-lg;
+        }
+        .tab-btn {
+            @apply px-6 py-3 text-lg font-semibold rounded-t-lg transition-colors duration-300 bg-white text-text-light border-b-2 border-transparent;
+        }
+        .tab-btn.active {
+            @apply text-gold-dark border-b-2 border-gold-primary font-bold;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .balance-pulse {
+            animation: balancePulse 2s ease;
+        }
+        @keyframes balancePulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans">
+
+    <!-- Floating Balance Display -->
+    <div id="fixed-balance" class="fixed top-5 right-5 bg-white p-4 rounded-lg shadow-xl border-2 border-gold-primary z-50 text-right">
+        <h3 class="font-bold text-gold-primary text-sm">REMAINING BALANCE</h3>
+        <div id="fixed-balance-amount" class="text-3xl font-bold text-gold-dark">$0</div>
+    </div>
+
+    <header class="bg-white text-gold-dark py-6 text-center rounded-b-xl shadow-md mb-8 border-b-4 border-gold-primary">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2"><i class="fas fa-crown mr-4"></i>Billionaire Spending Simulator</h1>
+            <p class="text-lg text-text-light">Experience what it's like to spend like a billionaire!</p>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 pb-12">
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-200 mb-8 bg-white rounded-t-xl px-4">
+            <button class="tab-btn active" data-tab="spend">Spend Money</button>
+            <button class="tab-btn" data-tab="inventory">Your Inventory</button>
+            <button class="tab-btn" data-tab="stats">Statistics</button>
+        </div>
+
+        <!-- Spend Money Tab -->
+        <div class="tab-content active" id="spend-tab">
+            <div class="flex flex-col lg:flex-row gap-6 mb-8">
+                <!-- Billionaire Selector -->
+                <div class="card flex-1">
+                    <h2 class="text-2xl font-bold mb-4 text-gold-primary"><i class="fas fa-user-tie mr-2"></i> Select a Billionaire</h2>
+                    <p class="text-text-light mb-4">Choose a billionaire to inherit their fortune and start spending!</p>
+                    <select id="billionaire-select" class="w-full p-3 border border-gold-primary/40 rounded-lg bg-white text-text-dark focus:outline-none focus:ring-2 focus:ring-gold-primary mb-4">
+                        <option value="">-- Choose a Billionaire --</option>
+                        <!-- Options will be dynamically loaded here -->
+                    </select>
+                    <button id="select-billionaire" class="btn-gold w-full"><i class="fas fa-check-circle mr-2"></i>Select Billionaire</button>
+                </div>
+
+                <!-- Balance Display -->
+                <div class="card flex-1 text-center flex flex-col justify-center bg-gradient-to-br from-white to-gold-light p-6 relative overflow-hidden">
+                    <div class="absolute -right-8 -top-8 w-24 h-24 bg-gold-primary/10 rounded-full"></div>
+                    <div class="absolute -left-8 -bottom-8 w-20 h-20 bg-gold-primary/10 rounded-full"></div>
+                    <h2 class="text-2xl font-bold mb-2 text-gold-primary"><i class="fas fa-coins mr-2"></i>Your Starting Balance</h2>
+                    <div id="balance" class="text-5xl font-bold text-gold-dark my-4">$0</div>
+                    <p class="text-text-light">Select a billionaire to see their fortune!</p>
+                </div>
+            </div>
+
+            <!-- Products -->
+            <div class="card">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gold-primary"><i class="fas fa-shopping-cart mr-2"></i>Luxury Products</h2>
+                    <div class="flex mt-4 md:mt-0">
+                        <span class="text-sm text-text-light mr-2 self-center">Sort by:</span>
+                        <select id="sort-products" class="text-sm border border-gold-primary/30 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-gold-primary">
+                            <option value="price-asc">Price (Low to High)</option>
+                            <option value="price-desc">Price (High to Low)</option>
+                            <option value="name">Name</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="products-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Products will be dynamically generated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Tab -->
+        <div class="tab-content" id="inventory-tab">
+            <div class="card">
+                <h2 class="text-2xl font-bold mb-4 text-gold-primary"><i class="fas fa-warehouse mr-2"></i>Your Purchases</h2>
+                <p class="text-text-light mb-6">All the luxury items you've purchased with your billionaire wealth.</p>
+                <div id="inventory-list" class="space-y-4">
+                    <div class="text-center py-12">
+                        <i class="fas fa-box-open text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-text-light">You haven't purchased anything yet.</p>
+                        <button class="btn-outline mt-4 switch-tab" data-tab="spend">Start Shopping</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Tab -->
+        <div class="tab-content" id="stats-tab">
+            <div class="card">
+                <h2 class="text-2xl font-bold mb-4 text-gold-primary"><i class="fas fa-chart-pie mr-2"></i>Spending Statistics</h2>
+                <p class="text-text-light mb-6">See how you've been spending your billionaire fortune.</p>
+                <div id="stats-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-gold-light rounded-xl p-6 text-center">
+                        <div class="text-3xl font-bold text-gold-dark mb-2" id="total-items">0</div>
+                        <div class="text-text-light">Total Items</div>
+                    </div>
+                    <div class="bg-gold-light rounded-xl p-6 text-center">
+                        <div class="text-3xl font-bold text-gold-dark mb-2" id="total-spent">$0</div>
+                        <div class="text-text-light">Total Spent</div>
+                    </div>
+                    <div class="bg-gold-light rounded-xl p-6 text-center">
+                        <div class="text-3xl font-bold text-gold-dark mb-2" id="remaining-balance">$0</div>
+                        <div class="text-text-light">Remaining Balance</div>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <h3 class="text-xl font-semibold mb-4 text-gold-primary">Spending Distribution</h3>
+                    <div id="chart-container" class="h-64 flex items-center justify-center bg-gold-light/30 rounded-xl">
+                        <p class="text-text-light">Purchase items to see spending distribution</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="fixed top-5 right-5 bg-gradient-to-r from-gold-primary to-gold-dark text-white py-3 px-6 rounded-lg shadow-lg transform translate-x-[120%] transition-transform duration-500 ease-in-out z-50">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span id="notification-text"></span>
+    </div>
+
+    <footer class="text-center mt-12 py-6 text-text-light bg-white rounded-t-lg border-t border-gold-primary/20">
+        <p>Billionaire Spending Simulator &copy; 2023</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- DATA (Simulating loaded JSON) ---
+            const appData = {
+                "billionaires": [
+                    { "name": "Elon Musk", "netWorth": 385000000000 },
+                    { "name": "Jeff Bezos", "netWorth": 245000000000 },
+                    { "name": "Mark Zuckerberg", "netWorth": 260000000000 },
+                    { "name": "Bill Gates", "netWorth": 115000000000 },
+                    { "name": "Warren Buffett", "netWorth": 115000000000 }
+                ],
+                "products": [
+                    { "id": 1, "name": "iPhone 16 Pro Max", "price": 999, "image": "https://www.zdnet.com/a/img/resize/90f6e5fe1ba09df72dacb4edf4590e4be1575445/2024/09/22/58c4c6e7-84d9-4fd2-9838-e962dc57ccc5/iphone-16-pro-outside-apple-store.jpg?auto=webp&width=1280", "category": "Electronics" },
+                    { "id": 2, "name": "iMac Pro", "price": 4999, "image": "https://techcrunch.com/wp-content/uploads/2017/12/apple_imac_pro_002.jpg", "category": "Electronics" },
+                    { "id": 3, "name": "Tesla Model S", "price": 89990, "image": "https://hips.hearstapps.com/hmg-prod/images/2025-tesla-model-s-1-672d42e172407.jpg?crop=0.465xw:0.466xh;0.285xw,0.361xh&resize=2048:*", "category": "Vehicles" },
+                    { "id": 4, "name": "Luxury Villa", "price": 25000000, "image": "https://media.vrbo.com/lodging/100000000/99930000/99926500/99926452/07742dbf.jpg?impolicy=resizecrop&rw=575&rh=575&ra=fill", "category": "Real Estate" },
+                    { "id": 5, "name": "Super Yacht", "price": 150000000, "image": "https://image.yachtbuyer.com/w1210/h694/qh/ca/k3d44a71b/vessel/resource/2756344/platinum-yacht-admiral-yachts.jpg", "category": "Marine" },
+                    { "id": 6, "name": "Private Jet", "price": 250000000, "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-IGKds7zRpEP8oYaMrFQzAaEeHBiYZAPGHA&s", "category": "Aviation" },
+                    { "id": 7, "name": "Tech Company", "price": 5000000000, "image": "https://images.pexels.com/photos/269077/pexels-photo-269077.jpeg", "category": "Business" },
+                    { "id": 8, "name": "Sports Team", "price": 20000000000, "image": "https://s.yimg.com/ny/api/res/1.2/kjVmueXIVarS_m7uol7.FA--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTM2MDtjZj13ZWJw/https://s.yimg.com/os/creatr-uploaded-images/2025-06/da511200-4184-11f0-9fdf-0d55ea7f8aed", "category": "Business" }
+                ]
+            };
+
+            // --- STATE ---
+            let balance = 0;
+            let inventory = {};
+            let totalSpent = 0;
+            let startingBalance = 0;
+
+            // --- DOM Elements ---
+            const balanceElement = document.getElementById('balance');
+            const fixedBalanceAmount = document.getElementById('fixed-balance-amount');
+            const billionaireSelect = document.getElementById('billionaire-select');
+            const selectButton = document.getElementById('select-billionaire');
+            const productsContainer = document.getElementById('products-container');
+            const inventoryList = document.getElementById('inventory-list');
+            const tabs = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            const sortSelect = document.getElementById('sort-products');
+            const totalItemsElement = document.getElementById('total-items');
+            const totalSpentElement = document.getElementById('total-spent');
+            const remainingBalanceElement = document.getElementById('remaining-balance');
+
+            // --- HELPER FUNCTIONS ---
+            const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
+            
+            const showNotification = (message) => {
+                notificationText.textContent = message;
+                notification.classList.remove('translate-x-[120%]');
+                setTimeout(() => notification.classList.add('translate-x-[120%]'), 3000);
+            };
+
+            // --- UPDATE FUNCTIONS ---
+            const updateBalanceDisplay = () => {
+                fixedBalanceAmount.textContent = formatCurrency(balance);
+                balanceElement.textContent = formatCurrency(startingBalance); // This now shows starting balance
+                fixedBalanceAmount.classList.add('balance-pulse');
+                setTimeout(() => fixedBalanceAmount.classList.remove('balance-pulse'), 2000);
+                updateStats();
+            };
+
+            const updateProductAffordability = () => {
+                document.querySelectorAll('.product-card').forEach(card => {
+                    const price = parseInt(card.dataset.price);
+                    card.querySelector('.buy-btn').disabled = balance < price;
+                });
+            };
+
+            const updateInventoryDisplay = () => {
+                if (Object.keys(inventory).length === 0) {
+                    inventoryList.innerHTML = `
+                        <div class="text-center py-12">
+                            <i class="fas fa-box-open text-4xl text-gray-300 mb-3"></i>
+                            <p class="text-text-light">You haven't purchased anything yet.</p>
+                            <button class="btn-outline mt-4 switch-tab" data-tab="spend">Start Shopping</button>
+                        </div>`;
+                    return;
+                }
+                
+                inventoryList.innerHTML = '';
+                for (const item of Object.values(inventory)) {
+                    inventoryList.innerHTML += `
+                        <div class="flex justify-between items-center p-4 border border-gold-primary/20 rounded-lg hover:bg-gold-light/30 transition-colors">
+                            <div class="flex items-center gap-4">
+                                <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md shadow-sm">
+                                <div>
+                                    <span class="font-semibold block">${item.name}</span>
+                                    <span class="text-sm text-text-light">${formatCurrency(item.price)} each</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-lg">x ${item.quantity.toLocaleString()}</div>
+                                <div class="text-sm text-text-light">Total: ${formatCurrency(item.price * item.quantity)}</div>
+                            </div>
+                        </div>`;
+                }
+            };
+
+            const updateStats = () => {
+                let totalItems = 0;
+                let spent = 0;
+                
+                for (const item of Object.values(inventory)) {
+                    totalItems += item.quantity;
+                    spent += item.price * item.quantity;
+                }
+                
+                totalItemsElement.textContent = totalItems.toLocaleString();
+                totalSpentElement.textContent = formatCurrency(spent);
+                remainingBalanceElement.textContent = formatCurrency(balance);
+            };
+
+            const sortProducts = (criteria) => {
+                switch(criteria) {
+                    case 'price-asc':
+                        appData.products.sort((a, b) => a.price - b.price);
+                        break;
+                    case 'price-desc':
+                        appData.products.sort((a, b) => b.price - a.price);
+                        break;
+                    case 'name':
+                        appData.products.sort((a, b) => a.name.localeCompare(b.name));
+                        break;
+                }
+                generateProductCards();
+                updateProductAffordability();
+            };
+
+            // --- DYNAMIC POPULATION ---
+            const populateBillionairesDropdown = () => {
+                appData.billionaires.forEach(b => {
+                    const option = document.createElement('option');
+                    option.value = b.netWorth;
+                    option.textContent = `${b.name} - ${formatCurrency(b.netWorth)}`;
+                    billionaireSelect.appendChild(option);
+                });
+            };
+
+            const generateProductCards = () => {
+                productsContainer.innerHTML = '';
+                appData.products.forEach(product => {
+                    const cardHTML = `
+                        <div class="product-card bg-white rounded-xl shadow-md overflow-hidden border border-gold-primary/20 flex flex-col h-full" data-price="${product.price}">
+                            <div class="h-48 overflow-hidden relative">
+                                <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
+                                <span class="absolute top-3 left-3 bg-gold-primary text-white text-xs font-bold px-2 py-1 rounded">${product.category}</span>
+                            </div>
+                            <div class="p-4 flex flex-col flex-grow">
+                                <h3 class="text-xl font-bold mb-2 text-gold-dark">${product.name}</h3>
+                                <p class="text-lg font-semibold text-gold-primary mb-2">${formatCurrency(product.price)}</p>
+                                <div class="mt-auto">
+                                    <div class="flex flex-col gap-2 mt-4">
+                                        <input type="number" min="1" value="1" placeholder="Qty" class="quantity-input w-full p-2 border border-gold-primary/40 rounded-md text-center font-bold focus:outline-none focus:ring-1 focus:ring-gold-primary">
+                                        <button class="buy-btn btn-gold w-full flex items-center justify-center" data-id="${product.id}">
+                                            <i class="fas fa-shopping-bag mr-2"></i>Buy
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    productsContainer.insertAdjacentHTML('beforeend', cardHTML);
+                });
+            };
+
+            // --- EVENT HANDLERS ---
+            const handleBillionaireSelect = () => {
+                const selectedValue = billionaireSelect.value;
+                if (!selectedValue) {
+                    showNotification('Please select a billionaire!');
+                    return;
+                }
+                startingBalance = parseInt(selectedValue);
+                balance = startingBalance;
+                inventory = {};
+                totalSpent = 0;
+                updateBalanceDisplay();
+                updateInventoryDisplay();
+                updateProductAffordability();
+                const selectedName = billionaireSelect.options[billionaireSelect.selectedIndex].text.split(' - ')[0];
+            };
+
+            const handleBuyClick = (e) => {
+                const buyButton = e.target.closest('.buy-btn');
+                if (!buyButton) return;
+
+                const card = buyButton.closest('.product-card');
+                const quantityInput = card.querySelector('.quantity-input');
+                const quantity = parseInt(quantityInput.value);
+                const productId = parseInt(buyButton.dataset.id);
+                const product = appData.products.find(p => p.id === productId);
+
+                if (isNaN(quantity) || quantity <= 0) {
+                    showNotification('Please enter a valid quantity.');
+                    return;
+                }
+                
+                const totalCost = product.price * quantity;
+                if (totalCost > balance) {
+                    showNotification('You cannot afford that many!');
+                    return;
+                }
+
+                balance -= totalCost;
+                totalSpent += totalCost;
+                
+                if (inventory[product.id]) {
+                    inventory[product.id].quantity += quantity;
+                } else {
+                    inventory[product.id] = { ...product, quantity: quantity };
+                }
+
+                updateBalanceDisplay();
+                updateInventoryDisplay();
+                updateProductAffordability();
+                quantityInput.value = 1; // Reset quantity input
+            };
+
+            const handleTabSwitch = (e) => {
+                const clickedTab = e.target.closest('.tab-btn');
+                if (!clickedTab) return;
+
+                const tabId = clickedTab.dataset.tab;
+                tabs.forEach(t => t.classList.remove('active'));
+                clickedTab.classList.add('active');
+
+                tabContents.forEach(content => {
+                    content.classList.remove('active', 'hidden');
+                    if(content.id !== `${tabId}-tab`) {
+                       content.classList.add('hidden');
+                    } else {
+                       content.classList.add('active');
+                    }
+                });
+                
+                // Update stats tab when switching to it
+                if (tabId === 'stats') {
+                    updateStats();
+                }
+            };
+            
+            // --- INITIALIZATION ---
+            function init() {
+                populateBillionairesDropdown();
+                sortProducts('price-asc'); // Initial sort and generation
+                updateBalanceDisplay();
+                updateProductAffordability();
+
+                // Event Listeners
+                selectButton.addEventListener('click', handleBillionaireSelect);
+                productsContainer.addEventListener('click', handleBuyClick);
+                document.querySelector('.flex.border-b').addEventListener('click', handleTabSwitch);
+                sortSelect.addEventListener('change', (e) => sortProducts(e.target.value));
+                
+                // Switch tab buttons from within content
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('switch-tab')) {
+                        const tabId = e.target.dataset.tab;
+                        document.querySelector(`.tab-btn[data-tab="${tabId}"]`).click();
+                    }
+                });
+            }
+
+            init();
+        });
+    </script>
+</body>
+</html>
