@@ -334,62 +334,116 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- DATA (JSON Format) ---
-            const appData = {
-                "billionaires": [
-                    { "name": "Elon Musk", "netWorth": 385000000000 },
-                    { "name": "Jeff Bezos", "netWorth": 245000000000 },
-                    { "name": "Mark Zuckerberg", "netWorth": 260000000000 },
-                    { "name": "Bill Gates", "netWorth": 115000000000 },
-                    { "name": "Warren Buffett", "netWorth": 115000000000 }
-                ],
-                "products": [
-                    // Real Estate
-                    { "id": 1, "name": "Luxury Penthouse", "price": 25000000, "image": "https://media.vrbo.com/lodging/100000000/99930000/99926500/99926452/07742dbf.jpg?impolicy=resizecrop&rw=575&rh=575&ra=fill", "category": "Real Estate" },
-                    { "id": 2, "name": "Private Island", "price": 150000000, "image": "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=500", "category": "Real Estate" },
-                    { "id": 3, "name": "Historic Castle", "price": 75000000, "image": "https://images.unsplash.com/photo-1520637836862-4d197d17c87a?w=500", "category": "Real Estate" },
-                    // Vehicles
-                    { "id": 4, "name": "Tesla Model S Plaid", "price": 129990, "image": "https://hips.hearstapps.com/hmg-prod/images/2025-tesla-model-s-1-672d42e172407.jpg?crop=0.465xw:0.466xh;0.285xw,0.361xh&resize=2048:*", "category": "Vehicles" },
-                    { "id": 5, "name": "Bugatti Chiron", "price": 3500000, "image": "https://images.unsplash.com/photo-1544829099-b9a0c5303bea?w=500", "category": "Vehicles" },
-                    { "id": 6, "name": "Private Helicopter", "price": 15000000, "image": "https://images.unsplash.com/photo-1540979388789-6cee28a1cdc9?w=500", "category": "Vehicles" },
-                    // Technology
-                    { "id": 7, "name": "iPhone 16 Pro Max", "price": 999, "image": "https://www.zdnet.com/a/img/resize/90f6e5fe1ba09df72dacb4edf4590e4be1575445/2024/09/22/58c4c6e7-84d9-4fd2-9838-e962dc57ccc5/iphone-16-pro-outside-apple-store.jpg?auto=webp&width=1280", "category": "Technology" },
-                    { "id": 8, "name": "Gaming Super Computer", "price": 50000, "image": "https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=500", "category": "Technology" },
-                    { "id": 9, "name": "Home AI System", "price": 500000, "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500", "category": "Technology" },
-                    // Fashion
-                    { "id": 10, "name": "Diamond Rolex", "price": 2500000, "image": "https://images.unsplash.com/photo-1523170335258-f5c6c6bd6edc?w=500", "category": "Fashion" },
-                    { "id": 11, "name": "Designer Wardrobe", "price": 1000000, "image": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500", "category": "Fashion" },
-                    { "id": 12, "name": "Rare Handbag Collection", "price": 500000, "image": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500", "category": "Fashion" },
-                    // Food
-                    { "id": 13, "name": "Private Chef (1 Year)", "price": 300000, "image": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500", "category": "Food" },
-                    { "id": 14, "name": "Wine Collection", "price": 5000000, "image": "https://images.unsplash.com/photo-1547595628-c61a29f496f0?w=500", "category": "Food" },
-                    { "id": 15, "name": "Luxury Restaurant", "price": 50000000, "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500", "category": "Food" },
-                    // Travel
-                    { "id": 16, "name": "Private Jet", "price": 250000000, "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-IGKds7zRpEP8oYaMrFQzAaEeHBiYZAPGHA&s", "category": "Travel" },
-                    { "id": 17, "name": "Luxury Yacht", "price": 150000000, "image": "https://image.yachtbuyer.com/w1210/h694/qh/ca/k3d44a71b/vessel/resource/2756344/platinum-yacht-admiral-yachts.jpg", "category": "Travel" },
-                    { "id": 18, "name": "Space Tourism Trip", "price": 450000, "image": "https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=500", "category": "Travel" },
-                    // Entertainment
-                    { "id": 19, "name": "Home Cinema", "price": 2000000, "image": "https://images.unsplash.com/photo-1489599004919-5b4f656a82e9?w=500", "category": "Entertainment" },
-                    { "id": 20, "name": "Sports Team", "price": 2000000000, "image": "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=500", "category": "Entertainment" },
-                    { "id": 21, "name": "Concert Hall", "price": 100000000, "image": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500", "category": "Entertainment" },
-                    // Health
-                    { "id": 22, "name": "Personal Trainer (1 Year)", "price": 100000, "image": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500", "category": "Health" },
-                    { "id": 23, "name": "Medical Center", "price": 500000000, "image": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=500", "category": "Health" },
-                    { "id": 24, "name": "Longevity Research", "price": 1000000000, "image": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=500", "category": "Health" },
-                    // Art
-                    { "id": 25, "name": "Famous Painting", "price": 300000000, "image": "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=500", "category": "Art" },
-                    { "id": 26, "name": "Art Gallery", "price": 50000000, "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500", "category": "Art" },
-                    { "id": 27, "name": "Sculpture Collection", "price": 25000000, "image": "https://images.unsplash.com/photo-1578662015879-c0f77e7f35f3?w=500", "category": "Art" },
-                    // Business
-                    { "id": 28, "name": "Tech Startup", "price": 1000000000, "image": "https://images.pexels.com/photos/269077/pexels-photo-269077.jpeg", "category": "Business" },
-                    { "id": 29, "name": "Media Company", "price": 5000000000, "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500", "category": "Business" },
-                    { "id": 30, "name": "Real Estate Empire", "price": 10000000000, "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=500", "category": "Business" },
-                    // Social Work
-                    { "id": 31, "name": "Build 100 Schools", "price": 500000000, "image": "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=500", "category": "Social Work" },
-                    { "id": 32, "name": "Clean Water for 1M People", "price": 200000000, "image": "https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=500", "category": "Social Work" },
-                    { "id": 33, "name": "Fund Medical Research", "price": 1000000000, "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500", "category": "Social Work" }
-                ]
-            };
-
+           const appData = {
+    "billionaires": [
+        { "name": "Elon Musk", "netWorth": 385000000000 },
+        { "name": "Jeff Bezos", "netWorth": 245000000000 },
+        { "name": "Mark Zuckerberg", "netWorth": 260000000000 },
+        { "name": "Bill Gates", "netWorth": 115000000000 },
+        { "name": "Warren Buffett", "netWorth": 115000000000 }
+    ],
+    "products": [
+        // Real Estate
+        { "id": 1, "name": "Luxury Penthouse", "price": 25000000, "image": "https://media.vrbo.com/lodging/100000000/99930000/99926500/99926452/07742dbf.jpg?impolicy=resizecrop&rw=575&rh=575&ra=fill", "category": "Real Estate" },
+        { "id": 2, "name": "Private Island", "price": 150000000, "image": "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=500", "category": "Real Estate" },
+        { "id": 3, "name": "Historic Castle", "price": 75000000, "image": "https://images.unsplash.com/photo-1520637836862-4d197d17c87a?w=500", "category": "Real Estate" },
+        { "id": 34, "name": "Beachfront Villa", "price": 45000000, "image": "https://images.unsplash.com/photo-1512917774080-9991f7c4c57d?w=500", "category": "Real Estate" },
+        { "id": 35, "name": "Mountain Chalet", "price": 30000000, "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=500", "category": "Real Estate" },
+        { "id": 36, "name": "Manhattan Skyscraper", "price": 500000000, "image": "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=500", "category": "Real Estate" },
+        { "id": 37, "name": "Vineyard Estate", "price": 85000000, "image": "https://images.unsplash.com/photo-1502005229762-cf1b2da90c16?w=500", "category": "Real Estate" },
+        { "id": 38, "name": "Urban Loft Complex", "price": 120000000, "image": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500", "category": "Real Estate" },
+        // Vehicles
+        { "id": 4, "name": "Tesla Model S Plaid", "price": 129990, "image": "https://hips.hearstapps.com/hmg-prod/images/2025-tesla-model-s-1-672d42e172407.jpg?crop=0.465xw:0.466xh;0.285xw,0.361xh&resize=2048:*", "category": "Vehicles" },
+        { "id": 5, "name": "Bugatti Chiron", "price": 3500000, "image": "https://images.unsplash.com/photo-1544829099-b9a0c5303bea?w=500", "category": "Vehicles" },
+        { "id": 6, "name": "Private Helicopter", "price": 15000000, "image": "https://images.unsplash.com/photo-1540979388789-6cee28a1cdc9?w=500", "category": "Vehicles" },
+        { "id": 39, "name": "Rolls-Royce Phantom", "price": 500000, "image": "https://images.unsplash.com/photo-1551524164-687a55dd1126?w=500", "category": "Vehicles" },
+        { "id": 40, "name": "Lamborghini Aventador", "price": 400000, "image": "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=500", "category": "Vehicles" },
+        { "id": 41, "name": "Luxury RV", "price": 2000000, "image": "https://images.unsplash.com/photo-1526144689276-6a4d3be0000f?w=500", "category": "Vehicles" },
+        { "id": 42, "name": "Electric Hypercar", "price": 2500000, "image": "https://images.unsplash.com/photo-1567818735868-e7b0330a9676?w=500", "category": "Vehicles" },
+        { "id": 43, "name": "Custom Motorcycle", "price": 150000, "image": "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=500", "category": "Vehicles" },
+        // Technology
+        { "id": 7, "name": "iPhone 16 Pro Max", "price": 999, "image": "https://www.zdnet.com/a/img/resize/90f6e5fe1ba09df72dacb4edf4590e4be1575445/2024/09/22/58c4c6e7-84d9-4fd2-9838-e962dc57ccc5/iphone-16-pro-outside-apple-store.jpg?auto=webp&width=1280", "category": "Technology" },
+        { "id": 8, "name": "Gaming Super Computer", "price": 50000, "image": "https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=500", "category": "Technology" },
+        { "id": 9, "name": "Home AI System", "price": 500000, "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500", "category": "Technology" },
+        { "id": 44, "name": "Smart Home Hub", "price": 10000, "image": "https://images.unsplash.com/photo-1558089687-3db7e7e9a216?w=500", "category": "Technology" },
+        { "id": 45, "name": "VR Gaming Suite", "price": 25000, "image": "https://images.unsplash.com/photo-1593508512255-86ab1721f26f?w=500", "category": "Technology" },
+        { "id": 46, "name": "Quantum Computer", "price": 10000000, "image": "https://images.unsplash.com/photo-1595687133172-47c8b3e5c27f?w=500", "category": "Technology" },
+        { "id": 47, "name": "Personal Drone", "price": 150000, "image": "https://images.unsplash.com/photo-1524143986875-3b098d4789de?w=500", "category": "Technology" },
+        { "id": 48, "name": "Augmented Reality Glasses", "price": 5000, "image": "https://images.unsplash.com/photo-1558882224-dda166733046?w=500", "category": "Technology" },
+        // Fashion
+        { "id": 10, "name": "Diamond Rolex", "price": 2500000, "image": "https://images.unsplash.com/photo-1523170335258-f5c6c6bd6edc?w=500", "category": "Fashion" },
+        { "id": 11, "name": "Designer Wardrobe", "price": 1000000, "image": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500", "category": "Fashion" },
+        { "id": 12, "name": "Rare Handbag Collection", "price": 500000, "image": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500", "category": "Fashion" },
+        { "id": 49, "name": "Couture Gown", "price": 200000, "image": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500", "category": "Fashion" },
+        { "id": 50, "name": "Bespoke Suit Collection", "price": 150000, "image": "https://images.unsplash.com/photo-1598032895397-b947244972c2?w=500", "category": "Fashion" },
+        { "id": 51, "name": "Luxury Sneaker Set", "price": 10000, "image": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500", "category": "Fashion" },
+        { "id": 52, "name": "Diamond Necklace", "price": 3000000, "image": "https://images.unsplash.com/photo-1608043152279-4c2d3c23c98a?w=500", "category": "Fashion" },
+        { "id": 53, "name": "Vintage Watch Collection", "price": 500000, "image": "https://images.unsplash.com/photo-1524592094714-0f25a6142421?w=500", "category": "Fashion" },
+        // Food
+        { "id": 13, "name": "Private Chef (1 Year)", "price": 300000, "image": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500", "category": "Food" },
+        { "id": 14, "name": "Wine Collection", "price": 5000000, "image": "https://images.unsplash.com/photo-1547595628-c61a29f496f0?w=500", "category": "Food" },
+        { "id": 15, "name": "Luxury Restaurant", "price": 50000000, "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500", "category": "Food" },
+        { "id": 54, "name": "Truffle Farm", "price": 10000000, "image": "https://images.unsplash.com/photo-1605871539348-7b68b6a4e5c7?w=500", "category": "Food" },
+        { "id": 55, "name": "Gourmet Food Tour", "price": 50000, "image": "https://images.unsplash.com/photo-1514539079130-25950c84c5ca?w=500", "category": "Food" },
+        { "id": 56, "name": "Private Vineyard", "price": 25000000, "image": "https://images.unsplash.com/photo-1518558007330-7b8b3a4b4a8b?w=500", "category": "Food" },
+        { "id": 57, "name": "Michelin Star Catering", "price": 1000000, "image": "https://images.unsplash.com/photo-1514944897597-4e4b4e6e4663?w=500", "category": "Food" },
+        { "id": 58, "name": "Caviar Reserve", "price": 750000, "image": "https://images.unsplash.com/photo-1611164878284-6b3e2e5d4c3e?w=500", "category": "Food" },
+        // Travel
+        { "id": 16, "name": "Private Jet", "price": 250000000, "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-IGKds7zRpEP8oYaMrFQzAaEeHBiYZAPGHA&s", "category": "Travel" },
+        { "id": 17, "name": "Luxury Yacht", "price": 150000000, "image": "https://image.yachtbuyer.com/w1210/h694/qh/ca/k3d44a71b/vessel/resource/2756344/platinum-yacht-admiral-yachts.jpg", "category": "Travel" },
+        { "id": 18, "name": "Space Tourism Trip", "price": 450000, "image": "https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=500", "category": "Travel" },
+        { "id": 59, "name": "Safari Expedition", "price": 100000, "image": "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=500", "category": "Travel" },
+        { "id": 60, "name": "Polar Cruise", "price": 200000, "image": "https://images.unsplash.com/photo-1483794344538-d0d2020a8a40?w=500", "category": "Travel" },
+        { "id": 61, "name": "Private Submarine", "price": 5000000, "image": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500", "category": "Travel" },
+        { "id": 62, "name": "World Cruise Package", "price": 1000000, "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500", "category": "Travel" },
+        { "id": 63, "name": "Luxury Train Journey", "price": 250000, "image": "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=500", "category": "Travel" },
+        // Entertainment
+        { "id": 19, "name": "Home Cinema", "price": 2000000, "image": "https://images.unsplash.com/photo-1489599004919-5b4f656a82e9?w=500", "category": "Entertainment" },
+        { "id": 20, "name": "Sports Team", "price": 2000000000, "image": "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=500", "category": "Entertainment" },
+        { "id": 21, "name": "Concert Hall", "price": 100000000, "image": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500", "category": "Entertainment" },
+        { "id": 64, "name": "Private Amusement Park", "price": 500000000, "image": "https://images.unsplash.com/photo-1505471767190-1f8e2b7b9746?w=500", "category": "Entertainment" },
+        { "id": 65, "name": "VIP Music Festival", "price": 50000, "image": "https://images.unsplash.com/photo-1506152983158-b6636b7b3a8e?w=500", "category": "Entertainment" },
+        { "id": 66, "name": "Luxury Gaming Lounge", "price": 1000000, "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=500", "category": "Entertainment" },
+        { "id": 67, "name": "Private Theater", "price": 15000000, "image": "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=500", "category": "Entertainment" },
+        { "id": 68, "name": "Celebrity Event Hosting", "price": 5000000, "image": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500", "category": "Entertainment" },
+        // Health
+        { "id": 22, "name": "Personal Trainer (1 Year)", "price": 100000, "image": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500", "category": "Health" },
+        { "id": 23, "name": "Medical Center", "price": 500000000, "image": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=500", "category": "Health" },
+        { "id": 24, "name": "Longevity Research", "price": 1000000000, "image": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=500", "category": "Health" },
+        { "id": 69, "name": "Private Wellness Retreat", "price": 2000000, "image": "https://images.unsplash.com/photo-1574680178050-55c6a6a96e0a?w=500", "category": "Health" },
+        { "id": 70, "name": "Personalized DNA Health Plan", "price": 250000, "image": "https://images.unsplash.com/photo-1581594749909-4ef8d6b6e92f?w=500", "category": "Health" },
+        { "id": 71, "name": "Home Gym Complex", "price": 500000, "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=500", "category": "Health" },
+        { "id": 72, "name": "Cryotherapy Chamber", "price": 150000, "image": "https://images.unsplash.com/photo-1605281312382-86f49c2e9f53?w=500", "category": "Health" },
+        { "id": 73, "name": "Health Spa Resort", "price": 75000000, "image": "https://images.unsplash.com/photo-1515377905703-c4788e6a85be?w=500", "category": "Health" },
+        // Art
+        { "id": 25, "name": "Famous Painting", "price": 300000000, "image": "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=500", "category": "Art" },
+        { "id": 26, "name": "Art Gallery", "price": 50000000, "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500", "category": "Art" },
+        { "id": 27, "name": "Sculpture Collection", "price": 25000000, "image": "https://images.unsplash.com/photo-1578662015879-c0f77e7f35f3?w=500", "category": "Art" },
+        { "id": 74, "name": "Rare Manuscript", "price": 10000000, "image": "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=500", "category": "Art" },
+        { "id": 75, "name": "Modern Art Installation", "price": 15000000, "image": "https://images.unsplash.com/photo-1501862700950-18382cd41497?w=500", "category": "Art" },
+        { "id": 76, "name": "Antique Tapestry", "price": 5000000, "image": "https://images.unsplash.com/photo-1573575155035-29fb405b4985?w=500", "category": "Art" },
+        { "id": 77, "name": "Private Museum", "price": 200000000, "image": "https://images.unsplash.com/photo-1580130775562-0b24d48d4ab7?w=500", "category": "Art" },
+        { "id": 78, "name": "Signed Picasso Sketch", "price": 75000000, "image": "https://images.unsplash.com/photo-1577720715949-f4096b93d24b?w=500", "category": "Art" },
+        // Business
+        { "id": 28, "name": "Tech Startup", "price": 1000000000, "image": "https://images.pexels.com/photos/269077/pexels-photo-269077.jpeg", "category": "Business" },
+        { "id": 29, "name": "Media Company", "price": 5000000000, "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500", "category": "Business" },
+        { "id": 30, "name": "Real Estate Empire", "price": 10000000000, "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=500", "category": "Business" },
+        { "id": 79, "name": "Luxury Hotel Chain", "price": 2000000000, "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500", "category": "Business" },
+        { "id": 80, "name": "Private Equity Firm", "price": 3000000000, "image": "https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=500", "category": "Business" },
+        { "id": 81, "name": "E-Commerce Platform", "price": 1500000000, "image": "https://images.unsplash.com/photo-1556742044-3c52d6e88c62?w=500", "category": "Business" },
+        { "id": 82, "name": "AI Research Lab", "price": 750000000, "image": "https://images.unsplash.com/photo-1516321310764-8d8c1f1b6d0b?w=500", "category": "Business" },
+        { "id": 83, "name": "Luxury Brand Acquisition", "price": 2500000000, "image": "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=500", "category": "Business" },
+        // Social Work
+        { "id": 31, "name": "Build 100 Schools", "price": 500000000, "image": "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=500", "category": "Social Work" },
+        { "id": 32, "name": "Clean Water for 1M People", "price": 200000000, "image": "https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=500", "category": "Social Work" },
+        { "id": 33, "name": "Fund Medical Research", "price": 1000000000, "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500", "category": "Social Work" },
+        { "id": 84, "name": "Global Reforestation Project", "price": 300000000, "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=500", "category": "Social Work" },
+        { "id": 85, "name": "Homeless Shelter Network", "price": 150000000, "image": "https://images.unsplash.com/photo-1567171463365-794fb21f90e8?w=500", "category": "Social Work" },
+        { "id": 86, "name": "Disaster Relief Fund", "price": 250000000, "image": "https://images.unsplash.com/photo-1593113598332-cd288d649433?w=500", "category": "Social Work" },
+        { "id": 87, "name": "Education Scholarships", "price": 100000000, "image": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=500", "category": "Social Work" },
+        { "id": 88, "name": "Renewable Energy Initiative", "price": 400000000, "image": "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=500", "category": "Social Work" }
+    ]
+};
             // --- STATE ---
             let balance = 0;
             let inventory = {};
